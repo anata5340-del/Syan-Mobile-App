@@ -1,0 +1,4 @@
+/Users/kashif/Documents/GitHub/Syan-Mobile/android/app/.cxx/RelWithDebInfo/44172k2v/x86/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir
+/Users/kashif/Documents/GitHub/Syan-Mobile/android/app/.cxx/RelWithDebInfo/44172k2v/x86/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir
+/Users/kashif/Documents/GitHub/Syan-Mobile/android/app/.cxx/RelWithDebInfo/44172k2v/x86/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/edit_cache.dir
+/Users/kashif/Documents/GitHub/Syan-Mobile/android/app/.cxx/RelWithDebInfo/44172k2v/x86/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/rebuild_cache.dir
