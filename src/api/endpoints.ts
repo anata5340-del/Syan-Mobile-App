@@ -2,6 +2,7 @@ const base = ''; // axios instance already configured with /api
 
 export const AUTH = {
   LOGIN: `${base}/users/login`,
+  SIGNUP: `${base}/users/signup`,
   LOGOUT: `${base}/users/logout`,
   VALIDATE: `${base}/users/validate`,
   RESET_PASSWORD: `${base}/users/reset-password`,

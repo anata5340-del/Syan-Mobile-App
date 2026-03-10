@@ -1,5 +1,25 @@
 export type LoginPayload = { email: string; password: string };
 
+export type SignupPayload = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  phone: string;
+  cnic: string;
+  jobStatus?: string;
+  jobLocation?: string;
+  yearOfGraduation?: string;
+  institute?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+};
+
+export type SignupResponse = {
+  user: User;
+};
+
 export type PackageItem = {
   _id: string;
   startDate: string;

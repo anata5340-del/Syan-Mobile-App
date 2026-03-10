@@ -13,7 +13,8 @@ import { IMAGES } from '../Constants/Images';
 import MainHeader from '../layout/MainHeader';
 import HistoryCard from '../Components/HistoryCard';
 import { useFavoriteQuizzes, useQuestionStatuses } from '../hooks/react-query/useFavorites';
-
+import { parseQuizStatusUrl } from '../utils/parseQuizStatusUrl';
+import { QuizStatus } from '../api/favorites.services';
 type FavoriteQuizScreenProps = StackScreenProps<RootStackParamList, 'FavoriteQuiz'>;
 
 const FavoriteQuiz = ({ navigation }: FavoriteQuizScreenProps) => {
@@ -31,31 +32,31 @@ const FavoriteQuiz = ({ navigation }: FavoriteQuizScreenProps) => {
     return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
   };
 
-  const handleQuizPress = (quiz: any) => {
-    
-    const type = quiz.type || 'video';
-    
-    const params: any = {
-      type,
-      duration: quiz.duration || 1800,
-      quizName: quiz.quizName,
-    };
-
-    if (type === 'video') {
-      params.courseId = quiz.courseId;
-      params.moduleId = quiz.moduleId;
-      params.sectionId = quiz.sectionId;
-      params.subSectionId = quiz.subSectionId;
-      params.questionIds = quiz.questionIds?.split(',') || [];
-    } else if (type === 'library') {
-      params.quizId = quiz.quizId;
-      params.paperId = quiz.moduleId;
-    } else if (type === 'custom') {
-      params.quizId = quiz.quizId;
-      params.topicIds = quiz.questionIds;
+  const handleQuizPress = (quiz: QuizStatus) => {
+    const parsed = quiz.url ? parseQuizStatusUrl(quiz.url, quiz.quizName) : null;
+    if (parsed) {
+      navigation.navigate('QuizWarning', {
+        type: parsed.type,
+        quizId: parsed.quizId,
+        quizName: parsed.quizName,
+        paperId: parsed.paperId,
+        topicId: parsed.topicId,
+        limit: parsed.limit,
+        estimatedQuestions: parsed.estimatedQuestions,
+        durationSeconds: parsed.durationSeconds,
+        courseId: parsed.courseId,
+        moduleId: parsed.moduleId,
+        sectionId: parsed.sectionId,
+        subSectionId: parsed.subSectionId,
+        questionIds: parsed.questionIds,
+      });
+    } else {
+      navigation.navigate('QuizWarning', {
+        quizId: quiz._id,
+        quizName: quiz.quizName,
+        type: 'custom',
+      });
     }
-
-    navigation.navigate('QuizWarning', params);
   };
 
   if (isLoading) {
@@ -91,7 +92,7 @@ const FavoriteQuiz = ({ navigation }: FavoriteQuizScreenProps) => {
               {quizzes.map((quiz: any, index: number) => (
                 <HistoryCard
                   key={quiz._id || index}
-                  // onPress={() => handleQuizPress(quiz)}
+                  onPress={() => handleQuizPress(quiz)}
                   imageSource={IMAGES.quiz_image}
                   title={quiz.quizName || 'Quiz'}
                   startDate={formatDate(quiz.createdAt)}

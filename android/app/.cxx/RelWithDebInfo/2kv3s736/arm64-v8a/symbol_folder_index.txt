@@ -1,0 +1,1 @@
+/Users/kashif/Documents/GitHub/Syan-Mobile-App/android/app/build/intermediates/cxx/RelWithDebInfo/2kv3s736/obj/arm64-v8a

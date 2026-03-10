@@ -59,7 +59,7 @@ const QuizWarning = ({ navigation, route }: QuizWarningProps) => {
     quizId || '', 
     paperId || '',
   );
-  console.log("Library Data:", type);
+  console.log("Library Data:", libraryData);
   // Generate time options (1-60 minutes)
   const minutesArray = Array.from({ length: 60 }, (_, i) => i + 1);
 

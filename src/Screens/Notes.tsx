@@ -32,6 +32,7 @@ import {
   useRemoveNoteFromFavorites,
 } from '../hooks/react-query/useFavorites';
 import Feather from 'react-native-vector-icons/Feather';
+import ImageViewing from 'react-native-image-viewing';
 import FavoriteNotes from './FavoriteNotes';
 
 const { height, width } = Dimensions.get('window');
@@ -39,13 +40,30 @@ const { height, width } = Dimensions.get('window');
 type Props = StackScreenProps<RootStackParamList, 'Notes'>;
 
 // HTML WebView Component with styled content
-const HTMLWebViewContent = ({ html }: { html: string }) => {
+const HTMLWebViewContent = ({ html, onImagePress }: { html: string; onImagePress?: (uri: string) => void }) => {
+  const [contentHeight, setContentHeight] = useState(0);
+  const webViewRef = useRef<WebView>(null);
+
+  useEffect(() => {
+    setContentHeight(0);
+  }, [html]);
+
+  const measureHeightJS = `
+    (function() {
+      var content = document.getElementById('content');
+      if (!content) return;
+      var h = content.offsetHeight + 20;
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'height', value: h }));
+    })();
+    true;
+  `;
+
   const htmlContent = `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
       <style>
         * {
           margin: 0;
@@ -53,13 +71,25 @@ const HTMLWebViewContent = ({ html }: { html: string }) => {
           box-sizing: border-box;
         }
         
+        html, body {
+          width: 100%;
+          height: auto !important;
+          min-height: 0 !important;
+          overflow: visible;
+        }
+        
         body {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
           font-size: 14px;
           line-height: 1.6;
           color: #000;
-          background-color: #f5f5f5;
+          background-color:rgb(230, 224, 224);
           padding: 10px;
+        }
+        
+        .content-wrap {
+          overflow-x: auto;
+          max-width: 100%;
         }
         
         h1 {
@@ -94,7 +124,8 @@ const HTMLWebViewContent = ({ html }: { html: string }) => {
         }
         
         p {
-          margin: 8px 0;
+          margin-bottom: 10px;
+          margin-top: 10px;
           line-height: 1.6;
         }
         
@@ -169,10 +200,16 @@ const HTMLWebViewContent = ({ html }: { html: string }) => {
           font-style: italic;
         }
         
+        .table-scroll {
+          overflow-x: auto;
+          max-width: 100%;
+          margin: 12px 0;
+        }
+        
         table {
           width: 100%;
+          min-width: 200px;
           border-collapse: collapse;
-          margin: 12px 0;
           border: 1px solid #ddd;
           border-radius: 4px;
           overflow: hidden;
@@ -189,6 +226,7 @@ const HTMLWebViewContent = ({ html }: { html: string }) => {
           border-bottom: 2px solid #ddd;
           background-color: #f8f9fa;
           color: #000;
+          white-space: nowrap;
         }
         
         td {
@@ -215,9 +253,12 @@ const HTMLWebViewContent = ({ html }: { html: string }) => {
         
         img {
           max-width: 100%;
+          width: 100%;
           height: auto;
           margin: 10px 0;
           border-radius: 4px;
+          display: block;
+          cursor: pointer;
         }
         
         hr {
@@ -232,20 +273,57 @@ const HTMLWebViewContent = ({ html }: { html: string }) => {
       </style>
     </head>
     <body>
-      ${html}
+      <div class="content-wrap" id="content">
+        ${html}
+      </div>
+      <script>
+        document.addEventListener('click', function(e) {
+          var el = e.target;
+          if (el.tagName === 'IMG' && el.src) {
+            e.preventDefault();
+            window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'imagePress', value: el.src }));
+          }
+        });
+      </script>
     </body>
     </html>
   `;
 
+  const handleMessage = (event: any) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+      if (data.type === 'height' && typeof data.value === 'number' && data.value > 0) {
+        setContentHeight(data.value);
+      } else if (data.type === 'imagePress' && data.value && onImagePress) {
+        onImagePress(data.value);
+      }
+    } catch (_) {}
+  };
+
+  const onLoadEnd = () => {
+    setTimeout(() => {
+      webViewRef.current?.injectJavaScript(measureHeightJS);
+    }, 300);
+    setTimeout(() => {
+      webViewRef.current?.injectJavaScript(measureHeightJS);
+    }, 800);
+  };
+
+  if (!html) return null;
+
   return (
-    <View style={{ height: 400, marginVertical: 5, borderRadius: 6, overflow: 'hidden', backgroundColor: '#f5f5f5' }}>
+    <View style={{ height: contentHeight > 0 ? contentHeight : undefined, marginVertical: 5, borderRadius: 6, overflow: 'hidden', backgroundColor: '#f5f5f5', width: '100%' }}>
       <WebView
+        ref={webViewRef}
+        key={html}
         source={{ html: htmlContent }}
         scrollEnabled={false}
         showsVerticalScrollIndicator={false}
-        scalesPageToFit={true}
+        showsHorizontalScrollIndicator={false}
         javaScriptEnabled={true}
-        containerStyle={{ flex: 1 }}
+        onMessage={handleMessage}
+        onLoadEnd={onLoadEnd}
+        style={{ width: '100%', opacity: contentHeight > 0 ? 1 : 0 }}
       />
     </View>
   );
@@ -269,6 +347,7 @@ const Notes = ({ navigation, route }: Props) => {
   const markedComplete = useRef<Set<number>>(new Set());
 
   const [completedSections, setCompletedSections] = useState<number[]>([]);
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
 
   const { data, isLoading, isError } = useSubSectionBlockNote(
     courseId,
@@ -518,7 +597,7 @@ const Notes = ({ navigation, route }: Props) => {
               style={styles.sectionContainer}
             >
               <Text style={styles.sectionTitle}>{section.title}</Text>
-              <HTMLWebViewContent html={section.html} />
+              <HTMLWebViewContent html={section.html} onImagePress={setViewingImage} />
             </View>
           ))}
         </View>
@@ -579,6 +658,13 @@ const Notes = ({ navigation, route }: Props) => {
         label={note?.title || 'Jump to Section'}
         mode="notes"
         completedItems={completedSections}
+      />
+
+      <ImageViewing
+        images={viewingImage ? [{ uri: viewingImage }] : []}
+        imageIndex={0}
+        visible={!!viewingImage}
+        onRequestClose={() => setViewingImage(null)}
       />
     </View>
   );
@@ -724,6 +810,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     top: height / 2 - 40,
+    width: 36,
     backgroundColor: COLORS.primary,
     borderTopLeftRadius: 11,
     borderBottomLeftRadius: 11,

@@ -21,14 +21,18 @@ type QuizHistoryScreenProps = StackScreenProps<RootStackParamList, 'QuizHistory'
 const QuizHistory = ({ navigation }: QuizHistoryScreenProps) => {
   const { data: quizStatuses, isLoading, error } = useQuizStatuses();
 
+  
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-GB');
   };
 
   const handleQuizPress = (quiz: QuizStatus) => {
+    console.log("Quiz:", quiz);
     const quizName = quiz.quizName || 'Quiz';
     const parsed = quiz.url ? parseQuizStatusUrl(quiz.url, quizName) : null;
+    console.log("Parsed:", parsed?.type);
 
     if (parsed) {
       navigation.navigate('QuizWarning', {

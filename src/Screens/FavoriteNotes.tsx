@@ -13,6 +13,8 @@ import { IMAGES } from '../Constants/Images';
 import MainHeader from '../layout/MainHeader';
 import HistoryCard from '../Components/HistoryCard';
 import { useFavoriteNotes, useNoteStatuses } from '../hooks/react-query/useFavorites';
+import { parseNoteStatusUrl } from '../utils/parseNoteStatusUrl';
+import { NoteStatus } from '../api/favorites.services';
 
 type FavoriteNotesScreenProps = StackScreenProps<RootStackParamList, 'FavoriteNotes'>;
 
@@ -38,17 +40,18 @@ const FavoriteNotes = ({ navigation }: FavoriteNotesScreenProps) => {
     return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
   };
 
-  const handleNotePress = (note: any) => {
-    console.log(' Opening note:', note);
+  const handleNotePress = (note: NoteStatus) => {
+    const parsed = note.url ? parseNoteStatusUrl(note.url) : null;
+    if (parsed) {
+      navigation.navigate('Notes', {
+        courseId: parsed.courseId,
+        moduleId: parsed.moduleId,
+        sectionId: parsed.sectionId,
+        subSectionId: parsed.subSectionId,
+        subSectionBlockId: parsed.subSectionBlockId,
+      });
+    }
     
-    navigation.navigate('Notes', {
-      courseId: note.courseId,
-      moduleId: note.moduleId,
-      sectionId: note.sectionId,
-      subSectionId: note.subSectionId,
-      blockId: note.blockId,
-      noteId: note.note._id,
-    });
   };
 
   if (isLoading) {
@@ -84,7 +87,7 @@ const FavoriteNotes = ({ navigation }: FavoriteNotesScreenProps) => {
               {notes.map((note: any, index: number) => (
                 <HistoryCard
                   key={note._id || index}
-                  // onPress={() => handleNotePress(note)}
+                  onPress={() => handleNotePress(note)}
                   imageSource={IMAGES.notes_icon}
                   title={note.note?.name || 'Note'}
                   startDate={formatDate(note.createdAt)}

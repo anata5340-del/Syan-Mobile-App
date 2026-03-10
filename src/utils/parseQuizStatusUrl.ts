@@ -33,7 +33,28 @@ export function parseQuizStatusUrl(
     const segments = pathPart.replace(/^\/+/, '').split('/');
     const params = new URLSearchParams(queryPart || '');
 
-    // Pattern: user/quiz/:quizId/library/customQuestions | user/quiz/:quizId/library/:paperId | etc.
+    // Video pattern: path contains 'videoCourses' (e.g. /user/videoCourses/:courseId/modules/.../quiz?questions=...)
+    const videoCoursesIndex = segments.indexOf('videoCourses');
+    if (videoCoursesIndex >= 0) {
+      const courseId = segments[videoCoursesIndex + 1];
+      const questionsParam = params.get('questions');
+      const questionIds = questionsParam ? questionsParam.split(',').filter(Boolean) : undefined;
+      const tParam = params.get('t');
+      const durationSeconds = tParam ? parseInt(tParam, 10) : undefined;
+
+      return {
+        type: 'video',
+        quizName: quizName || 'Quiz',
+        courseId: params.get('courseId') || courseId,
+        moduleId: params.get('moduleId') || undefined,
+        sectionId: params.get('sectionId') || undefined,
+        subSectionId: params.get('subSectionId') || undefined,
+        questionIds: questionIds?.length ? questionIds : undefined,
+        durationSeconds: durationSeconds && !isNaN(durationSeconds) ? durationSeconds : undefined,
+      };
+    }
+
+    // Quiz patterns: user/quiz/:quizId/library/customQuestions | user/quiz/:quizId/library/:paperId
     const quizIdIndex = segments.indexOf('quiz');
     const quizId = quizIdIndex >= 0 ? segments[quizIdIndex + 1] : undefined;
     if (!quizId) return null;
@@ -68,7 +89,7 @@ export function parseQuizStatusUrl(
       };
     }
 
-    // Video pattern: may have courseId, moduleId, sectionId, subSectionId, questionIds in path or query
+    // Fallback: quiz path without library (treat as video-style with quizId)
     const questionsParam = params.get('questions');
     const questionIds = questionsParam ? questionsParam.split(',').filter(Boolean) : undefined;
     const tParam = params.get('t');
@@ -78,10 +99,10 @@ export function parseQuizStatusUrl(
       type: 'video',
       quizId,
       quizName: quizName || 'Quiz',
-      courseId: params.get('courseId') || segments[segments.indexOf('videoCourses') + 1],
-      moduleId: params.get('moduleId'),
-      sectionId: params.get('sectionId'),
-      subSectionId: params.get('subSectionId'),
+      courseId: params.get('courseId') || undefined,
+      moduleId: params.get('moduleId') || undefined,
+      sectionId: params.get('sectionId') || undefined,
+      subSectionId: params.get('subSectionId') || undefined,
       questionIds: questionIds?.length ? questionIds : undefined,
       durationSeconds: durationSeconds && !isNaN(durationSeconds) ? durationSeconds : undefined,
     };

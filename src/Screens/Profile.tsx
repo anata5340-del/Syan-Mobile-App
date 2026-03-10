@@ -125,6 +125,11 @@ const Profile: React.FC = () => {
       height: 200,
       cropping: true,
       compressImageQuality: 0.8,
+      cropperStatusBarColor: '#000000',
+      cropperToolbarColor: '#000000',
+      cropperToolbarTitle: 'Crop CNIC Image',
+      cropperToolbarWidgetColor: '#ffffff',
+      freeStyleCropEnabled: true,
     });
 
     handleChange(

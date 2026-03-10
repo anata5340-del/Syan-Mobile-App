@@ -71,7 +71,7 @@ const ScreenBottomTab = ({ activeTabs, onChange }: Props) => {
                 ]}>
                   <FeatherIcon
                     name={tab.icon}
-                    size={20}
+                    size={16}
                     color={isActive ? COLORS.primary : '#6b7280'}
                   />
                 </View>
@@ -98,17 +98,17 @@ export default ScreenBottomTab;
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     backgroundColor: '#ffffff',
   },
   tabContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 10,
+    gap: 6,
     backgroundColor: '#f9fafb',
-    borderRadius: 16,
-    padding: 6,
+    borderRadius: 12,
+    padding: 4,
   },
   tabWrapper: {
     flex: 1,
@@ -117,42 +117,42 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderRadius: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+    borderRadius: 10,
     backgroundColor: 'transparent',
     position: 'relative',
-    minHeight: 70,
+    minHeight: 50,
   },
   activeTab: {
     backgroundColor: '#ffffff',
     shadowColor: COLORS.black,
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 3,
     },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 6,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',
-    marginBottom: 6,
+    marginBottom: 3,
   },
   activeIconContainer: {
     backgroundColor: COLORS.primary + '15',
   },
   tabLabel: {
     ...FONTS.fontTitle,
-    fontSize: 12,
+    fontSize: 10,
     color: '#6b7280',
     textAlign: 'center',
-    marginTop: 2,
+    marginTop: 1,
     fontWeight: '500',
   },
   activeLabel: {
@@ -161,9 +161,9 @@ const styles = StyleSheet.create({
   },
   activeIndicator: {
     position: 'absolute',
-    bottom: 4,
-    width: 20,
-    height: 3,
+    bottom: 3,
+    width: 16,
+    height: 2.5,
     borderRadius: 2,
     backgroundColor: COLORS.primary,
   },

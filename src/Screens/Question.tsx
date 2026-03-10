@@ -20,7 +20,6 @@ import ConfirmModal from '../Components/ModalConfirm';
 import BottomSheetTOC from '../Components/BotomSheets/BottomSheetTOC';
 import BottomSheet from '@gorhom/bottom-sheet';
 import PrimaryButton from '../Components/PrimaryButton';
-import { useSubSectionQuizQuestions } from '../hooks/react-query/useVideoCourses';
 import { useLibraryPaperQuestions, useCustomQuizQuestions, useQuestionsByIds } from '../hooks/react-query/useQuizes';
 import { Question as QuestionType, QuizSubmission } from '../types/quiz.types';
 import { submitQuestionAnswer } from '../api/video.service';
@@ -110,25 +109,23 @@ const favoriteQuizUrl = useMemo(() => {
 ]);
 
   // Fetch questions based on type
-  // --- Video quiz: fetch questions for this subsection ---
-  // Flow: Question (video) → useSubSectionQuizQuestions → getSubSectionQuizQuestions
-  //       → GET /videoCourses/:courseId/modules/:moduleId/section/:sectionId/subSection/:subSectionId/questions?questionIds=...
+  // --- Video quiz: fetch questions by IDs directly ---
+  // Flow: Question (video) → useQuestionsByIds → getQuestionsByIds
+  //       → GET /quizes/questions?questionIds=...
   //       → response.questions used below in useMemo as rawQuestions for type === 'video'
   const {
   data: videoQuestionsData,
   isLoading: isVideoLoading,
   isError: isVideoError,
   error: videoError,
-} = useSubSectionQuizQuestions(
-  courseId || '',
-  moduleId || '',
-  sectionId || '',
-  subSectionId || '',
+} = useQuestionsByIds(
   normalizedQuestionIds,
-  { enabled: type === 'video' && !!courseId }
+  { enabled: type === 'video' && !!normalizedQuestionIds }
 );
 
-// console.log("Video Questions Data:", videoQuestionsData);
+console.log("Video Questions Data: herer 2", courseId, moduleId, sectionId, subSectionId, normalizedQuestionIds);
+
+
 
   const {
   data: libraryQuestionsData,
@@ -216,8 +213,10 @@ const isFavorited = !!favoriteRecord;
   console.log('🔄 Processing questions for type:', type);
   
   let rawQuestions: any[] = [];
+  
 
   if (type === 'video' && videoQuestionsData?.questions) {
+    
     rawQuestions = videoQuestionsData.questions;
     console.log('Video questions:', rawQuestions.length);
   } else if (type === 'library' && libraryQuestionsData?.data?.questions) {

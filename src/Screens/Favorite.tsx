@@ -18,7 +18,10 @@ import {
   useVideoStatuses, 
   useNoteStatuses 
 } from '../hooks/react-query/useFavorites';
-
+import { parseVideoStatusUrl } from '../utils/parseVideoStatusUrl';
+import { parseNoteStatusUrl } from '../utils/parseNoteStatusUrl';
+import { parseQuizStatusUrl } from '../utils/parseQuizStatusUrl';  
+import { NoteStatus, QuizStatus, VideoStatus } from '../api/favorites.services';
 type HomeScreenProps = StackScreenProps<RootStackParamList, 'Favorite'>;
 
 const Favorite = ({ navigation, route }: HomeScreenProps) => {
@@ -58,61 +61,65 @@ const Favorite = ({ navigation, route }: HomeScreenProps) => {
   };
 
   // Handle quiz card press - navigate to Question screen
-  const handleQuizPress = (quiz: any) => {
-    console.log(' favorite quiz:', quiz);
-    
-    // Determine quiz type from stored data
-    const type = quiz.type || 'video'; // default to video if not specified
-    
-    const params: any = {
-      type,
-      duration: quiz.duration || 1800,
-      quizName: quiz.quizName,
-    };
-
-    if (type === 'video') {
-      params.courseId = quiz.courseId;
-      params.moduleId = quiz.moduleId;
-      params.sectionId = quiz.sectionId;
-      params.subSectionId = quiz.subSectionId;
-      params.questionIds = quiz.questionIds?.split(',') || [];
-    } else if (type === 'library') {
-      params.quizId = quiz.quizId;
-      params.paperId = quiz.moduleId; // Stored in moduleId
-    } else if (type === 'custom') {
-      params.quizId = quiz.quizId;
-      params.topicIds = quiz.questionIds; // Stored in questionIds
+  const handleQuizPress = (quiz: QuizStatus) => {
+    const quizName = quiz.quizName || 'Quiz';
+    const parsed = quiz.url ? parseQuizStatusUrl(quiz.url, quizName) : null;
+    if (parsed) {
+      navigation.navigate('QuizWarning', {
+        type: parsed.type,
+        quizId: parsed.quizId,
+        quizName: parsed.quizName,
+        paperId: parsed.paperId,
+        topicId: parsed.topicId,
+        limit: parsed.limit,
+        estimatedQuestions: parsed.estimatedQuestions,
+        durationSeconds: parsed.durationSeconds,
+        courseId: parsed.courseId,
+        moduleId: parsed.moduleId,
+        sectionId: parsed.sectionId,
+        subSectionId: parsed.subSectionId,
+        questionIds: parsed.questionIds,
+      });
+    } else {
+      navigation.navigate('QuizWarning', {
+        quizId: quiz._id,
+        quizName: quiz.quizName,
+        type: 'custom',
+      });
     }
-
-    // navigation.navigate('Question', params);
   };
 
   // Handle video card press
-  const handleVideoPress = (video: any) => {
-    console.log(' favorite video:', video);
-    
-    // navigation.navigate('Videos', {
-    //   courseId: video.courseId,
-    //   moduleId: video.moduleId,
-    //   sectionId: video.sectionId,
-    //   subSectionId: video.subSectionId,
-    //   blockId: video.blockId,
-    //   videoId: video.video._id,
-    // });
+  const handleVideoPress = (video: VideoStatus) => {
+    console.log("Video:", video);
+    const parsed = video.url ? parseVideoStatusUrl(video.url) : null;
+    if (parsed) {
+      navigation.navigate('Videos', {
+        courseId: parsed.courseId,
+        moduleId: parsed.moduleId,
+        sectionId: parsed.sectionId,
+        subSectionId: parsed.subSectionId,
+        subSectionBlockId: parsed.subSectionBlockId,
+        blockName: parsed.blockName ?? video.videoName,
+      });
+    }
+    // navigation.navigate('Videos', { videoId });
   };
 
   // Handle note card press
-  const handleNotePress = (note: any) => {
-    console.log(' favorite note:', note);
-    
-    // navigation.navigate('Notes', {
-    //   courseId: note.courseId,
-    //   moduleId: note.moduleId,
-    //   sectionId: note.sectionId,
-    //   subSectionId: note.subSectionId,
-    //   blockId: note.blockId,
-    //   noteId: note.note._id,
-    // });
+  const handleNotePress =(note: NoteStatus) => {
+    // console.log("Note:", note);
+    const parsed = note.url ? parseNoteStatusUrl(note.url) : null;
+    console.log("Parsed Note:", parsed);
+    if (parsed) {
+      navigation.navigate('Notes', {
+        courseId: parsed.courseId,
+        moduleId: parsed.moduleId,
+        sectionId: parsed.sectionId,
+        subSectionId: parsed.subSectionId,
+        subSectionBlockId: parsed.subSectionBlockId,
+      });
+    }
   };
 
   // Get first 2 items of each type

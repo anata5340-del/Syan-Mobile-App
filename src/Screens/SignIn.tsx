@@ -165,22 +165,24 @@ const SignIn = ({ navigation }: SingInScreenProps) => {
                                 <Text style={{ ...FONTS.fontMedium, fontSize: 14, color: COLORS.primary }}>Reset here</Text>
                             </TouchableOpacity>
                         </View>
-                        {/* <View style={{ marginBottom: 15 }}>
-                            <Text style={[styles.title2, { color: COLORS.title, textAlign: 'center', opacity: .5 }]}>Don’t have an account?</Text>
+                        <View
+                            style={[GlobalStyleSheet.flex, {
+                                marginTop: 5,
+                                paddingHorizontal: 10,
+                                justifyContent: 'center',
+                                gap: 5
+                            }]}
+                        >
+                            <Text style={[styles.text, { color: COLORS.title }]}>Don't have an account?</Text>
+                            <TouchableOpacity
+                                activeOpacity={0.5}
+                                onPress={() => navigation.navigate('SignUp')}
+                            >
+                                <Text style={{ ...FONTS.fontMedium, fontSize: 14, color: COLORS.primary }}>Sign Up</Text>
+                            </TouchableOpacity>
                         </View>
-                        <Button
-                            title={"SIGN UP"}
-                            // onPress={() => navigation.navigate('DrawerNavigation',{screen : 'Home'} )}
-                            onPress={() => navigation.navigate('SignUp')}
-                            style={{ borderRadius: 52 }}
-                            color={COLORS.secondary}
-                        /> */}
                     </View>
                 </View>
-
-
-
-
             </ScrollView>
             <PopupMessage
                 type={popup.type}

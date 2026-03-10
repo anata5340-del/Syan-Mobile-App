@@ -85,6 +85,7 @@ const Videos = ({ navigation, route }: Props) => {
   );
 
   const videoData = data?.video;
+  console.log("Video Data:", videoData);
 
   // ============== FAVORITES ==============
   const { data: isFavorited, isLoading: isFavoriteLoading } = useIsVideoFavorited(videoData?._id || '');
@@ -762,6 +763,7 @@ const Videos = ({ navigation, route }: Props) => {
             </TouchableOpacity>
           </View>
           <Pdf
+            trustAllCerts={false}
             source={{ uri: videoData.pdfSource, cache: true }}
             style={styles.pdf}
             onLoadComplete={(numberOfPages) => console.log(`Pages: ${numberOfPages}`)}

@@ -13,6 +13,8 @@ import { IMAGES } from '../Constants/Images';
 import MainHeader from '../layout/MainHeader';
 import HistoryCard from '../Components/HistoryCard';
 import { useFavoriteVideos, useVideoStatuses } from '../hooks/react-query/useFavorites';
+import { parseVideoStatusUrl } from '../utils/parseVideoStatusUrl';
+import { VideoStatus } from '../api/favorites.services';
 
 type FavoriteVideosScreenProps = StackScreenProps<RootStackParamList, 'FavoriteVideos'>;
 
@@ -34,17 +36,20 @@ const FavoriteVideos = ({ navigation }: FavoriteVideosScreenProps) => {
     return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
   };
 
-  const handleVideoPress = (video: any) => {
-    console.log('Opening video:', video);
-    
-    navigation.navigate('Videos', {
-      courseId: video.courseId,
-      moduleId: video.moduleId,
-      sectionId: video.sectionId,
-      subSectionId: video.subSectionId,
-      blockId: video.blockId,
-      videoId: video.video._id,
-    });
+  const handleVideoPress = (video: VideoStatus) => {
+    console.log("Video:", video);
+    const parsed = video.url ? parseVideoStatusUrl(video.url) : null;
+    if (parsed) {
+      navigation.navigate('Videos', {
+        courseId: parsed.courseId,
+        moduleId: parsed.moduleId,
+        sectionId: parsed.sectionId,
+        subSectionId: parsed.subSectionId,
+        subSectionBlockId: parsed.subSectionBlockId,
+        blockName: parsed.blockName,
+      });
+    }
+   
   };
 
   if (isLoading) {
@@ -80,7 +85,7 @@ const FavoriteVideos = ({ navigation }: FavoriteVideosScreenProps) => {
               {videos.map((video: any, index: number) => (
                 <HistoryCard
                   key={video._id || index}
-                  // onPress={() => handleVideoPress(video)}
+                  onPress={() => handleVideoPress(video)}
                   imageSource={IMAGES.video_icon}
                   title={video.video?.name || 'Video'}
                   startDate={formatDate(video.createdAt)}
